@@ -12,7 +12,8 @@
 	],
 	"require": {
 		"aws/aws-sdk-php": "2.*",
-		"doctrine/cache": "1.*"
+		"doctrine/cache": "1.*",
+		"silverstripe/crontask": "*"
 	},
 	"extra": {
 		"install-name": "silverstripe-dynamodb"

@@ -1,6 +1,6 @@
 # SilverStripe DynamoDB
 
-This module enables sotring SilverStripe sessions in DynamoDB.
+This module enables storing SilverStripe sessions in DynamoDB.
 
 ## Installation
 
