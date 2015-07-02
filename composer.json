@@ -16,6 +16,6 @@
 		"silverstripe/crontask": "*"
 	},
 	"extra": {
-		"install-name": "silverstripe-dynamodb"
+		"installer-name": "silverstripe-dynamodb"
 	}
 }
