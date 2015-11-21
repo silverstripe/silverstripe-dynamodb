@@ -17,31 +17,32 @@
  * @see https://github.com/silverstripe-labs/silverstripe-crontask
  * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/feature-dynamodb-session-handler.html
  */
-class GarbageCollectSessionCronTask extends Object implements CronTask {
+class GarbageCollectSessionCronTask extends Object implements CronTask
+{
+    private static $schedule = '0 3 * * *';
 
-	private static $schedule = '0 3 * * *';
+    public function getSchedule()
+    {
+        return self::config()->schedule;
+    }
 
-	public function getSchedule() {
-		return self::config()->schedule;
-	}
+    public function output($message)
+    {
+        if (PHP_SAPI === 'cli') {
+            echo $message.PHP_EOL;
+        } else {
+            echo $message.'<br>'.PHP_EOL;
+        }
+    }
 
-	public function output($message) {
-		if(PHP_SAPI === 'cli') {
-			echo $message.PHP_EOL;
-		} else {
-			echo $message.'<br>'.PHP_EOL;
-		}
-	}
-
-	public function process() {
-		$dynamoSession = DynamoDbSession::get();
-		if($dynamoSession) {
-			$dynamoSession->collect();
-			$this->output('DynamoDB session garbage collection finished');
-		} else {
-			$this->output('DynamoDB session not enabled. Skipping');
-		}
-
-	}
-
+    public function process()
+    {
+        $dynamoSession = DynamoDbSession::get();
+        if ($dynamoSession) {
+            $dynamoSession->collect();
+            $this->output('DynamoDB session garbage collection finished');
+        } else {
+            $this->output('DynamoDB session not enabled. Skipping');
+        }
+    }
 }
