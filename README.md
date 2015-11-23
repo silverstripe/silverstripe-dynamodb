@@ -19,7 +19,15 @@ If you wish to store sessions in DynamoDB, set the following environment variabl
 	define('AWS_REGION_NAME', 'ap-southeast-2');
 
 Once these are in place, this module will configure DynamoDB and register that as the session handler.
-You will **need** to create the specified table using the AWS DynamoDB console for the region.
+
+To create a DynamoDB session table you can execute the following code:
+
+```php
+DynamoDbSession::get()->getHandler()->createSessionsTable(5,5);
+```
+
+See http://docs.aws.amazon.com/aws-sdk-php/v2/guide/feature-dynamodb-session-handler.html#create-a-table-for-storing-your-sessions
+for more information about `createSessionsTable`
 
 ## Using DynamoDB outside of AWS
 
