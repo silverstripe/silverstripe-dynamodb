@@ -11,7 +11,7 @@
 		}
 	],
 	"require": {
-		"aws/aws-sdk-php": "2.*",
+		"aws/aws-sdk-php": "~2.8.24",
 		"doctrine/cache": "1.*",
 		"silverstripe/crontask": "*"
 	},
