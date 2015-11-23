@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../../../vendor/autoload.php';
-
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\Session\SessionHandler;
 
@@ -21,6 +19,15 @@ class DynamoDbSession
      * @var SessionHandler
      */
     protected $handler;
+
+    /**
+     * Getter for SessionHandler
+     *
+     * @return SessionHandler
+     */
+    public function getHandler() {
+        return $this->handler;
+    }
 
     /**
      * Get an instance of DynamoDbSession configured from the environment if available.
