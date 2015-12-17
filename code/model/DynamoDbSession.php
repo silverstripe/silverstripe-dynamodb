@@ -25,7 +25,8 @@ class DynamoDbSession
      *
      * @return SessionHandler
      */
-    public function getHandler() {
+    public function getHandler()
+    {
         return $this->handler;
     }
 
