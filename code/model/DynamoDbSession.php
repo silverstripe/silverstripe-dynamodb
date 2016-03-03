@@ -50,10 +50,6 @@ class DynamoDbSession
                 $dynamoOptions['credentials.cache'] = true;
             }
 
-            if (defined('AWS_DYNAMODB_SESSION_LIFETIME')) {
-                $dynamoOptions['session_lifetime'] = AWS_DYNAMODB_SESSION_LIFETIME;
-            }
-
             return new DynamoDbSession($dynamoOptions, AWS_DYNAMODB_SESSION_TABLE);
         }
 
@@ -62,25 +58,25 @@ class DynamoDbSession
 
     public function __construct($options, $table)
     {
-        // refer to the Session class to find the session timeout value (if it exists)
-        // in terms of DynamoDB, session_lifetime is the time to mark the inactive
-        // session to be garbage collected
-        // if {@link GarbageCollectSessionCronTask} is running periodically on your
-        // server (via the silverstripe-crontask module), then the inactive session
-        // will get removed from the DynamoDB session table.
-        if (!isset($options['session_lifetime'])) {
+        $this->client = DynamoDbClient::factory($options);
+        $this->table = $table;
+
+        $handlerOptions = array(
+            'dynamodb_client' => $this->client,
+            'table_name' => $this->table,
+        );
+
+        if (defined('AWS_DYNAMODB_SESSION_LIFETIME')) {
+            $handlerOptions['session_lifetime'] = AWS_DYNAMODB_SESSION_LIFETIME;
+        }
+        elseif (!isset($handlerOptions['session_lifetime'])) {
             $timeout = Config::inst()->get('Session', 'timeout');
             if ($timeout != null) {
-                $options['session_lifetime'] = $timeout;
+                $handlerOptions['session_lifetime'] = $timeout;
             }
         }
 
-        $this->client = DynamoDbClient::factory($options);
-        $this->table = $table;
-        $this->handler = SessionHandler::factory(array(
-            'dynamodb_client' => $this->client,
-            'table_name' => $this->table,
-        ));
+        $this->handler = SessionHandler::factory($handlerOptions);
     }
 
     /**
