@@ -50,7 +50,7 @@ class DynamoDbSession
                 $dynamoOptions['credentials.cache'] = true;
             }
 
-            return new DynamoDbSession($dynamoOptions, AWS_DYNAMODB_SESSION_TABLE);
+            return new static($dynamoOptions, AWS_DYNAMODB_SESSION_TABLE);
         }
 
         return null;
