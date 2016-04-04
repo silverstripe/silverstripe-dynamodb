@@ -60,4 +60,9 @@ For example, in your `_ss_environment.php` file, set garbage collection after 1 
 
 See http://docs.aws.amazon.com/aws-sdk-php/guide/latest/feature-dynamodb-session-handler.html for more information.
 
+## Contribute
+
+Do you want to contribute? Great, please see the [CONTRIBUTING.md](CONTRIBUTING.md)
+guide.
+
 
