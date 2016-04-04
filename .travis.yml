@@ -33,4 +33,4 @@ before_script:
   - composer install
 
 script:
-  - vendor/bin/phpunit dynamodb/tests
+  - vendor/bin/phpunit silverstripe-dynamodb/tests
