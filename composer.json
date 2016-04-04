@@ -15,6 +15,9 @@
 		"doctrine/cache": "1.*",
 		"silverstripe/crontask": "*"
 	},
+    "require-dev": {
+        "phpunit/PHPUnit": "~3.7@stable"
+    },
 	"extra": {
 		"installer-name": "silverstripe-dynamodb"
 	}
