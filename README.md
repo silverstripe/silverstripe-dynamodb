@@ -65,4 +65,18 @@ See http://docs.aws.amazon.com/aws-sdk-php/guide/latest/feature-dynamodb-session
 Do you want to contribute? Great, please see the [CONTRIBUTING.md](CONTRIBUTING.md)
 guide.
 
+## License
+
+This module is released under the BSD 3-Clause License, see [license.md](license.md).
+
+## Changelog
+
+See the separate [CHANGELOG.md](CHANGELOG.md)
+
+## Code of conduct
+
+When having discussions about this module in issues or pull request please
+adhere to the [SilverStripe Community Code of Conduct](https://docs.silverstripe.org/en/contributing/code_of_conduct).
+
+
 
