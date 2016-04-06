@@ -4,12 +4,16 @@
 	"type": "silverstripe-module",
 	"keywords": ["silverstripe", "aws", "dynamodb"],
 	"license": "BSD-3-Clause",
-	"authors": [
-		{
-			"name": "Stig Lindqvist",
-			"email": "stig@silverstripe.com"
-		}
-	],
+    "authors": [
+        {
+            "name": "SilverStripe",
+            "homepage": "http://silverstripe.com"
+        },
+        {
+            "name": "The SilverStripe Community",
+            "homepage": "http://silverstripe.org"
+        }
+    ],
 	"require": {
 		"aws/aws-sdk-php": "~2.8.24",
 		"doctrine/cache": "1.*",
