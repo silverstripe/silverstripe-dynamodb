@@ -2,6 +2,11 @@
 
 This module enables storing SilverStripe sessions in DynamoDB.
 
+## Requirements
+
+ * SilverStripe 3.1+
+ * PHP 5.5+
+
 ## Installation
 
 Add these custom repositories to your composer.json
@@ -20,14 +25,7 @@ If you wish to store sessions in DynamoDB, set the following environment variabl
 
 Once these are in place, this module will configure DynamoDB and register that as the session handler.
 
-To create a DynamoDB session table you can execute the following code:
-
-```php
-DynamoDbSession::get()->getHandler()->createSessionsTable(5,5);
-```
-
-See http://docs.aws.amazon.com/aws-sdk-php/v2/guide/feature-dynamodb-session-handler.html#create-a-table-for-storing-your-sessions
-for more information about `createSessionsTable`
+Before you can actually use this, you need to create a table in which to store the sessions. This can be done through the [AWS Console for Amazon DynamoDB](https://console.aws.amazon.com/dynamodb/home), or using the SDK.
 
 ## Using DynamoDB outside of AWS
 
@@ -58,7 +56,7 @@ For example, in your `_ss_environment.php` file, set garbage collection after 1 
 
 	define('AWS_DYNAMODB_SESSION_LIFETIME', 3600);
 
-See http://docs.aws.amazon.com/aws-sdk-php/guide/latest/feature-dynamodb-session-handler.html for more information.
+See https://docs.aws.amazon.com/aws-sdk-php/v3/guide/service/dynamodb-session-handler.html for more information.
 
 ## Contribute
 
