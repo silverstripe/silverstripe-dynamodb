@@ -15,7 +15,7 @@ class DynamoDbSessionTest extends \SapphireTest
         $dynamoOptions['secret'] = 'AWS_SECRET_KEY';
         $sess = new DynamoDbSession($dynamoOptions, 'session_table');
         $handler = $sess->getHandler();
-        $this->assertInstanceOf('\\Aws\\DynamoDb\\Session\\SessionHandler', $handler);
+        $this->assertInstanceOf('\\Aws\\DynamoDb\\SessionHandler', $handler);
     }
 
 
