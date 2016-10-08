@@ -55,7 +55,7 @@ class DynamoDbSession
                 // cache credentials when IAM fetches the credentials from EC2 metadata service
                 // this will use doctrine/cache (included via composer) to do the actual caching into the filesystem
                 // http://docs.aws.amazon.com/aws-sdk-php/v2/guide/credentials.html#instance-profile-credentials
-                $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new FilesystemCache('/tmp/cache'));
+                $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new FilesystemCache(TEMP_PATH));
             }
 
             return new static($dynamoOptions, AWS_DYNAMODB_SESSION_TABLE);
