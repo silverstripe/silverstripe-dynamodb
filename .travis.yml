@@ -24,7 +24,6 @@ matrix:
     - php: 7.0
 
 before_script:
-  - pear config-set preferred_state beta
   - yes '' | pecl install apcu-4.0.11
   - composer self-update || true
   - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
