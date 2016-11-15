@@ -19,7 +19,7 @@
  */
 class GarbageCollectSessionCronTask extends Object implements CronTask
 {
-    private static $schedule = '0 3 * * *';
+    private static $schedule = '0 */4 * * *';
 
     public function getSchedule()
     {
