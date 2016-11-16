@@ -3,7 +3,7 @@
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\SessionHandler;
 use Aws\DoctrineCacheAdapter;
-use Doctrine\Common\Cache\ApcuCache;
+use Doctrine\Common\Cache\FilesystemCache;
 
 class DynamoDbSession
 {
@@ -53,9 +53,9 @@ class DynamoDbSession
                 $dynamoOptions['credentials']['secret'] = AWS_SECRET_KEY;
             } else {
                 // cache credentials when IAM fetches the credentials from EC2 metadata service
-                // this will use doctrine/cache (included via composer) to do the actual caching into APCu
-                // http://docs.aws.amazon.com/aws-sdk-php/guide/latest/performance.html#cache-instance-profile-credentials
-                $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new ApcuCache());
+                // this will use doctrine/cache (included via composer) to do the actual caching into the filesystem
+                // http://docs.aws.amazon.com/aws-sdk-php/v2/guide/credentials.html#instance-profile-credentials
+                $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new FilesystemCache(TEMP_PATH));
             }
 
             return new static($dynamoOptions, AWS_DYNAMODB_SESSION_TABLE);
