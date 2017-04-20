@@ -4,8 +4,8 @@ This module enables storing SilverStripe sessions in DynamoDB.
 
 ## Requirements
 
- * SilverStripe 3.1+
- * PHP 5.5+
+ * SilverStripe 4.0+
+ * PHP 5.6+
 
 ## Installation
 

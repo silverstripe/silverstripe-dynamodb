@@ -17,12 +17,27 @@
 	"require": {
 		"aws/aws-sdk-php": "~3.18",
 		"doctrine/cache": "1.*",
-		"silverstripe/crontask": "*"
+		"silverstripe/crontask": "*",
+		"silverstripe/framework": "^4@dev"
 	},
 	"require-dev": {
-		"phpunit/PHPUnit": "~3.7@stable"
+		"phpunit/PHPUnit": "^5.7"
 	},
+	"autoload": {
+    "psr-4": {
+      "SilverStripe\\DynamoDb\\": "code/",
+      "SilverStripe\\DynamoDb\\Tests\\": "tests/"
+    }
+  },
 	"extra": {
-		"installer-name": "silverstripe-dynamodb"
-	}
+		"installer-name": "silverstripe-dynamodb",
+		"branch-alias": {
+			"dev-master": "3.0.x-dev"
+		}
+	},
+	"scripts": {
+		"lint": "phpcs code/ tests/"
+	},
+	"minimum-stability": "dev",
+	"prefer-stable": true
 }

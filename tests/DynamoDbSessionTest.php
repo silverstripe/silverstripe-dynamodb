@@ -1,6 +1,11 @@
 <?php
 
-class DynamoDbSessionTest extends \SapphireTest
+namespace SilverStripe\DynamoDb\Tests;
+
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DynamoDb\Model\DynamoDbSession;
+
+class DynamoDbSessionTest extends SapphireTest
 {
 
     public function testGetReturnsNullWhenNotConfigured()
@@ -17,6 +22,4 @@ class DynamoDbSessionTest extends \SapphireTest
         $handler = $sess->getHandler();
         $this->assertInstanceOf('\\Aws\\DynamoDb\\SessionHandler', $handler);
     }
-
-
 }

@@ -1,9 +1,13 @@
 <?php
 
+namespace SilverStripe\DynamoDb\Model;
+
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\SessionHandler;
 use Aws\DoctrineCacheAdapter;
 use Doctrine\Common\Cache\ApcuCache;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Session;
 
 class DynamoDbSession
 {
@@ -34,6 +38,7 @@ class DynamoDbSession
 
     /**
      * Get an instance of DynamoDbSession configured from the environment if available.
+     *
      * @return null|DynamoDbSession
      */
     public static function get()
@@ -42,11 +47,11 @@ class DynamoDbSession
         if (defined('AWS_DYNAMODB_SESSION_TABLE') && AWS_DYNAMODB_SESSION_TABLE) {
             $dynamoOptions = array('region' => AWS_REGION_NAME);
 
-           // This endpoint can be set for locally testing DynamoDB.
-           // see http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html
-           if (defined('AWS_DYNAMODB_ENDPOINT')) {
+            // This endpoint can be set for locally testing DynamoDB.
+            // see http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html
+            if (defined('AWS_DYNAMODB_ENDPOINT')) {
                 $dynamoOptions['endpoint'] = AWS_DYNAMODB_ENDPOINT;
-           }
+            }
 
             if (defined('AWS_ACCESS_KEY') && defined('AWS_SECRET_KEY')) {
                 $dynamoOptions['credentials']['key'] = AWS_ACCESS_KEY;
@@ -68,10 +73,13 @@ class DynamoDbSession
     {
         $this->client = new DynamoDbClient(array_merge(['version' => '2012-08-10'], $options));
         $this->table = $table;
-        $this->handler = SessionHandler::fromClient($this->client, [
+        $this->handler = SessionHandler::fromClient(
+            $this->client,
+            [
             'table_name' => $this->table,
             'session_lifetime' => $this->getSessionLifetime(),
-        ]);
+            ]
+        );
     }
 
     /**
@@ -82,11 +90,12 @@ class DynamoDbSession
      *
      * @return int The session lifetime
      */
-    protected function getSessionLifetime() {
+    protected function getSessionLifetime()
+    {
         if (defined('AWS_DYNAMODB_SESSION_LIFETIME')) {
             return AWS_DYNAMODB_SESSION_LIFETIME;
         }
-        if (($timeout = (int)Config::inst()->get('Session', 'timeout')) > 0) {
+        if (($timeout = (int)Config::inst()->get(Session::class, 'timeout')) > 0) {
             return $timeout;
         }
         return (int) ini_get('session.gc_maxlifetime');
