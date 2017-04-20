@@ -1,6 +1,9 @@
 <?php
 
+namespace SilverStripe\DynamoDb\Tests;
+
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\DynamoDb\Model\DynamoDbSession;
 
 class DynamoDbSessionTest extends SapphireTest
 {
@@ -19,6 +22,4 @@ class DynamoDbSessionTest extends SapphireTest
         $handler = $sess->getHandler();
         $this->assertInstanceOf('\\Aws\\DynamoDb\\SessionHandler', $handler);
     }
-
-
 }

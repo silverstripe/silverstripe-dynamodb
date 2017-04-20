@@ -1,7 +1,9 @@
 <?php
+namespace SilverStripe\DynamoDb\Tasks;
 
 use SilverStripe\Core\Object;
 use SilverStripe\CronTask\Interfaces\CronTask;
+use SilverStripe\DynamoDb\Model;
 
 /**
  * Assuming there is DynamoDB session support registered,
