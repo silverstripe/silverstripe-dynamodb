@@ -1,6 +1,8 @@
 <?php
 
-class DynamoDbSessionTest extends \SapphireTest
+use SilverStripe\Dev\SapphireTest;
+
+class DynamoDbSessionTest extends SapphireTest
 {
 
     public function testGetReturnsNullWhenNotConfigured()

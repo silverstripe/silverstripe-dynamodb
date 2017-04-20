@@ -4,6 +4,9 @@ use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\SessionHandler;
 use Aws\DoctrineCacheAdapter;
 use Doctrine\Common\Cache\ApcuCache;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Session;
+
 
 class DynamoDbSession
 {
@@ -86,7 +89,7 @@ class DynamoDbSession
         if (defined('AWS_DYNAMODB_SESSION_LIFETIME')) {
             return AWS_DYNAMODB_SESSION_LIFETIME;
         }
-        if (($timeout = (int)Config::inst()->get('Session', 'timeout')) > 0) {
+        if (($timeout = (int)Config::inst()->get(Session::class, 'timeout')) > 0) {
             return $timeout;
         }
         return (int) ini_get('session.gc_maxlifetime');

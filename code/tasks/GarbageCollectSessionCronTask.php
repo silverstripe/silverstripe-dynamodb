@@ -1,5 +1,8 @@
 <?php
 
+use SilverStripe\Core\Object;
+use SilverStripe\CronTask\Interfaces\CronTask;
+
 /**
  * Assuming there is DynamoDB session support registered,
  * this task will run a garbage collection of the sessions
