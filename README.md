@@ -1,5 +1,7 @@
 # SilverStripe DynamoDB
 
+[![Build Status](https://travis-ci.org/silverstripe/silverstripe-dynamodb.svg?branch=master)](https://travis-ci.org/silverstripe/silverstripe-dynamodb)
+
 This module enables storing SilverStripe sessions in DynamoDB.
 
 ## Requirements
