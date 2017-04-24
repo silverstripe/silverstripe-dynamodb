@@ -15,6 +15,7 @@
 		}
 	],
 	"require": {
+		"ext-apcu": "*",
 		"aws/aws-sdk-php": "~3.18",
 		"doctrine/cache": "1.*",
 		"silverstripe/crontask": "*",
