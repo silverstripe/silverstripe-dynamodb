@@ -1,7 +1,8 @@
 <?php
 namespace SilverStripe\DynamoDb\Tasks;
 
-use SilverStripe\Core\Object;
+use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\CronTask\Interfaces\CronTask;
 use SilverStripe\DynamoDb\Model\DynamoDbSession;
 
@@ -22,8 +23,11 @@ use SilverStripe\DynamoDb\Model\DynamoDbSession;
  * @see https://github.com/silverstripe-labs/silverstripe-crontask
  * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/feature-dynamodb-session-handler.html
  */
-class GarbageCollectSessionCronTask extends Object implements CronTask
+class GarbageCollectSessionCronTask implements CronTask
 {
+    use Configurable;
+    use Injectable;
+
     private static $schedule = '* * * * *';
 
     public function getSchedule()
