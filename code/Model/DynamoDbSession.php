@@ -108,12 +108,4 @@ class DynamoDbSession
     {
         return $this->handler->register();
     }
-
-    /**
-     * Garbage collect the configured DynamoDB session table
-     */
-    public function collect()
-    {
-        return $this->handler->garbageCollect();
-    }
 }
