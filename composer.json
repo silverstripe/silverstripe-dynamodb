@@ -17,7 +17,8 @@
 	"require": {
 		"aws/aws-sdk-php": "~3.18",
 		"doctrine/cache": "1.*",
-		"silverstripe/crontask": "*"
+		"silverstripe/crontask": "*",
+		"silverstripe/framework": "^3.2"
 	},
 	"require-dev": {
 		"phpunit/PHPUnit": "~3.7@stable"
