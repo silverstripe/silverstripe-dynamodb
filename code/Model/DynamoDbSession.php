@@ -44,18 +44,24 @@ class DynamoDbSession
     public static function get()
     {
         // Use DynamoDB for distributed session storage if it's configured
-        if (defined('AWS_DYNAMODB_SESSION_TABLE') && AWS_DYNAMODB_SESSION_TABLE) {
-            $dynamoOptions = array('region' => AWS_REGION_NAME);
+        $AWS_DYNAMODB_SESSION_TABLE = getenv('AWS_DYNAMODB_SESSION_TABLE');
+        if (!empty($AWS_DYNAMODB_SESSION_TABLE)) {
+            $AWS_REGION_NAME = getenv('AWS_REGION_NAME');
+            $AWS_DYNAMODB_ENDPOINT = getenv('AWS_DYNAMODB_ENDPOINT');
+            $AWS_ACCESS_KEY = getenv('AWS_ACCESS_KEY');
+            $AWS_SECRET_KEY = getenv('AWS_SECRET_KEY');
+
+            $dynamoOptions = array('region' => $AWS_REGION_NAME);
 
             // This endpoint can be set for locally testing DynamoDB.
             // see http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html
-            if (defined('AWS_DYNAMODB_ENDPOINT')) {
-                $dynamoOptions['endpoint'] = AWS_DYNAMODB_ENDPOINT;
+            if (!empty($AWS_DYNAMODB_ENDPOINT)) {
+                $dynamoOptions['endpoint'] = $AWS_DYNAMODB_ENDPOINT;
             }
 
-            if (defined('AWS_ACCESS_KEY') && defined('AWS_SECRET_KEY')) {
-                $dynamoOptions['credentials']['key'] = AWS_ACCESS_KEY;
-                $dynamoOptions['credentials']['secret'] = AWS_SECRET_KEY;
+            if (!empty($AWS_ACCESS_KEY) && !empty($AWS_SECRET_KEY)) {
+                $dynamoOptions['credentials']['key'] = $AWS_ACCESS_KEY;
+                $dynamoOptions['credentials']['secret'] = $AWS_SECRET_KEY;
             } else {
                 // cache credentials when IAM fetches the credentials from EC2 metadata service
                 // this will use doctrine/cache (included via composer) to do the actual caching into APCu
@@ -63,7 +69,7 @@ class DynamoDbSession
                 $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new ApcuCache());
             }
 
-            return new static($dynamoOptions, AWS_DYNAMODB_SESSION_TABLE);
+            return new static($dynamoOptions, $AWS_DYNAMODB_SESSION_TABLE);
         }
 
         return null;
@@ -92,8 +98,9 @@ class DynamoDbSession
      */
     protected function getSessionLifetime()
     {
-        if (defined('AWS_DYNAMODB_SESSION_LIFETIME')) {
-            return AWS_DYNAMODB_SESSION_LIFETIME;
+        $AWS_DYNAMODB_SESSION_LIFETIME = getenv('AWS_DYNAMODB_SESSION_LIFETIME');
+        if (!empty($AWS_DYNAMODB_SESSION_LIFETIME)) {
+            return $AWS_DYNAMODB_SESSION_LIFETIME;
         }
         if (($timeout = (int)Config::inst()->get(Session::class, 'timeout')) > 0) {
             return $timeout;
