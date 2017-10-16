@@ -27,7 +27,7 @@ If you wish to store sessions in DynamoDB, set the following environment variabl
 
 Once these are in place, this module will configure DynamoDB and register that as the session handler.
 
-Before you can actually use this, you need to create a table in which to store the sessions. This can be done through the [AWS Console for Amazon DynamoDB](https://console.aws.amazon.com/dynamodb/home), or using the SDK.
+Before you can actually use this, you need to create a table in which to store the sessions. This can be done through the [AWS Console for Amazon DynamoDB](https://console.aws.amazon.com/dynamodb/home), or using the SDK. When creating the table, you should set the primary key to `id` of type `string`.
 
 ## Using DynamoDB outside of AWS
 
