@@ -1,7 +1,7 @@
 {
 	"name": "silverstripe/dynamodb",
 	"description": "SilverStripe DynamoDB integration.",
-	"type": "silverstripe-module",
+	"type": "silverstripe-vendormodule",
 	"keywords": ["silverstripe", "aws", "dynamodb"],
 	"license": "BSD-3-Clause",
 	"authors": [

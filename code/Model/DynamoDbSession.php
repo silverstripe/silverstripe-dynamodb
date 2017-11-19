@@ -8,6 +8,7 @@ use Aws\DoctrineCacheAdapter;
 use Doctrine\Common\Cache\ApcuCache;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Session;
+use SilverStripe\Core\Environment;
 
 class DynamoDbSession
 {
@@ -44,24 +45,24 @@ class DynamoDbSession
     public static function get()
     {
         // Use DynamoDB for distributed session storage if it's configured
-        $AWS_DYNAMODB_SESSION_TABLE = getenv('AWS_DYNAMODB_SESSION_TABLE');
-        if (!empty($AWS_DYNAMODB_SESSION_TABLE)) {
-            $AWS_REGION_NAME = getenv('AWS_REGION_NAME');
-            $AWS_DYNAMODB_ENDPOINT = getenv('AWS_DYNAMODB_ENDPOINT');
-            $AWS_ACCESS_KEY = getenv('AWS_ACCESS_KEY');
-            $AWS_SECRET_KEY = getenv('AWS_SECRET_KEY');
+        $awsDynamoDBSessionTable = Environment::getEnv('AWS_DYNAMODB_SESSION_TABLE');
+        if (!empty($awsDynamoDBSessionTable)) {
+            $awsRegionName = Environment::getEnv('AWS_REGION_NAME');
+            $awsDynamoDBEndpoint = Environment::getEnv('AWS_DYNAMODB_ENDPOINT');
+            $awsAccessKey = Environment::getEnv('AWS_ACCESS_KEY');
+            $awsSecretKey = Environment::getEnv('AWS_SECRET_KEY');
 
-            $dynamoOptions = array('region' => $AWS_REGION_NAME);
+            $dynamoOptions = array('region' => $awsRegionName);
 
             // This endpoint can be set for locally testing DynamoDB.
             // see http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html
-            if (!empty($AWS_DYNAMODB_ENDPOINT)) {
-                $dynamoOptions['endpoint'] = $AWS_DYNAMODB_ENDPOINT;
+            if (!empty($awsDynamoDBEndpoint)) {
+                $dynamoOptions['endpoint'] = $awsDynamoDBEndpoint;
             }
 
-            if (!empty($AWS_ACCESS_KEY) && !empty($AWS_SECRET_KEY)) {
-                $dynamoOptions['credentials']['key'] = $AWS_ACCESS_KEY;
-                $dynamoOptions['credentials']['secret'] = $AWS_SECRET_KEY;
+            if (!empty($awsAccessKey) && !empty($awsSecretKey)) {
+                $dynamoOptions['credentials']['key'] = $awsAccessKey;
+                $dynamoOptions['credentials']['secret'] = $awsSecretKey;
             } else {
                 // cache credentials when IAM fetches the credentials from EC2 metadata service
                 // this will use doctrine/cache (included via composer) to do the actual caching into APCu
@@ -69,7 +70,7 @@ class DynamoDbSession
                 $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new ApcuCache());
             }
 
-            return new static($dynamoOptions, $AWS_DYNAMODB_SESSION_TABLE);
+            return new static($dynamoOptions, $awsDynamoDBSessionTable);
         }
 
         return null;
@@ -98,9 +99,9 @@ class DynamoDbSession
      */
     protected function getSessionLifetime()
     {
-        $AWS_DYNAMODB_SESSION_LIFETIME = getenv('AWS_DYNAMODB_SESSION_LIFETIME');
-        if (!empty($AWS_DYNAMODB_SESSION_LIFETIME)) {
-            return $AWS_DYNAMODB_SESSION_LIFETIME;
+        $awsDynamoDBSessionLifetime = Environment::getEnv('AWS_DYNAMODB_SESSION_LIFETIME');
+        if (!empty($awsDynamoDBSessionLifetime)) {
+            return $awsDynamoDBSessionLifetime;
         }
         if (($timeout = (int)Config::inst()->get(Session::class, 'timeout')) > 0) {
             return $timeout;
