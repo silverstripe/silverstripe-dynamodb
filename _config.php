@@ -1,5 +1,8 @@
 <?php
-$dynamoSession = \SilverStripe\DynamoDb\Model\DynamoDbSession::get();
-if($dynamoSession) {
-	$dynamoSession->register();
+
+use SilverStripe\DynamoDb\Model\DynamoDbSession;
+
+$dynamoSession = DynamoDbSession::get();
+if ($dynamoSession) {
+    $dynamoSession->register();
 }
