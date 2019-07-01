@@ -15,13 +15,13 @@ Add these custom repositories to your composer.json
 
 ## Sessions with DynamoDB
 
-If you wish to store sessions in DynamoDB, set the following environment variables in your `_ss_environment.php` file:
+If you wish to store sessions in DynamoDB, set the required environment variables in `.env`:
 
 	// the name of the DynamoDB table to store sessions in
-	define('AWS_DYNAMODB_SESSION_TABLE', 'mysession');
+	AWS_DYNAMODB_SESSION_TABLE=mysession
 
 	// the region that the DynamoDB table will live in (in this example here it uses Sydney)
-	define('AWS_REGION_NAME', 'ap-southeast-2');
+	AWS_REGION_NAME=ap-southeast-2
 
 Once these are in place, this module will configure DynamoDB and register that as the session handler.
 
@@ -35,8 +35,8 @@ in EC2 instances, as credentials are automatically handled by the IAM role insid
 
 	// the AWS access key and secret. This is optional if you've configured an instance with an IAM role
 	// http://docs.aws.amazon.com/aws-sdk-php/guide/latest/credentials.html#caching-iam-role-credentials
-	define('AWS_ACCESS_KEY', '<access key here>');
-	define('AWS_SECRET_KEY', '<access secret here>');
+	AWS_ACCESS_KEY=my-access-key
+	AWS_SECRET_KEY=my-secret
 
 ## Garbage collecting sessions
 
