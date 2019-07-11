@@ -12,8 +12,6 @@ use Aws\DynamoDb\SessionConnectionInterface;
  * so the latter may intercept session table updates intelligently.
  *
  * @see \SilverStripe\DynamoDb\DynamoDbClient
- *
- * @internal WARNING: this is not a part of the public API and will be removed in a patch release
  */
 class SessionHandler extends \Aws\DynamoDb\SessionHandler
 {

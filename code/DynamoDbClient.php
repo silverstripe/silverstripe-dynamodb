@@ -11,8 +11,6 @@ namespace SilverStripe\DynamoDb;
  * PHP string is the php binary data type, so this should work seamlessly.
  *
  * @see https://github.com/silverstripe/silverstripe-dynamodb/issues/32
- *
- * @internal WARNING: this is not a part of the public API and will be removed in a patch release
  */
 class DynamoDbClient extends \Aws\DynamoDb\DynamoDbClient
 {
