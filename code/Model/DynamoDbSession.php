@@ -85,6 +85,7 @@ class DynamoDbSession
             [
             'table_name' => $this->table,
             'session_lifetime' => $this->getSessionLifetime(),
+            'data_attribute_type' => 'binary'
             ]
         );
     }
