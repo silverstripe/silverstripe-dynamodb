@@ -2,8 +2,8 @@
 
 namespace SilverStripe\DynamoDb\Model;
 
-use SilverStripe\DynamoDb\DynamoDbClient;
-use SilverStripe\DynamoDb\SessionHandler;
+use Aws\DynamoDb\DynamoDbClient;
+use Aws\DynamoDb\SessionHandler;
 use Aws\DoctrineCacheAdapter;
 use Doctrine\Common\Cache\ApcuCache;
 use SilverStripe\Core\Config\Config;
@@ -78,14 +78,14 @@ class DynamoDbSession
 
     public function __construct($options, $table)
     {
-        $this->client = new DynamoDbClient($table, array_merge(['version' => '2012-08-10'], $options));
-
+        $this->client = new DynamoDbClient(array_merge(['version' => '2012-08-10'], $options));
         $this->table = $table;
         $this->handler = SessionHandler::fromClient(
             $this->client,
             [
             'table_name' => $this->table,
             'session_lifetime' => $this->getSessionLifetime(),
+            'data_attribute_type' => 'binary'
             ]
         );
     }
