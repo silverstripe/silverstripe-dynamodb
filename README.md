@@ -17,13 +17,13 @@ Add these custom repositories to your composer.json
 
 ## Sessions with DynamoDB
 
-If you wish to store sessions in DynamoDB, set the following environment variables in your `_ss_environment.php` file:
+If you wish to store sessions in DynamoDB, set the required environment variables in `.env`:
 
 	// the name of the DynamoDB table to store sessions in
-	define('AWS_DYNAMODB_SESSION_TABLE', 'mysession');
+	AWS_DYNAMODB_SESSION_TABLE=mysession
 
 	// the region that the DynamoDB table will live in (in this example here it uses Sydney)
-	define('AWS_REGION_NAME', 'ap-southeast-2');
+	AWS_REGION_NAME=ap-southeast-2
 
 Once these are in place, this module will configure DynamoDB and register that as the session handler.
 
@@ -37,8 +37,8 @@ in EC2 instances, as credentials are automatically handled by the IAM role insid
 
 	// the AWS access key and secret. This is optional if you've configured an instance with an IAM role
 	// http://docs.aws.amazon.com/aws-sdk-php/guide/latest/credentials.html#caching-iam-role-credentials
-	define('AWS_ACCESS_KEY', '<access key here>');
-	define('AWS_SECRET_KEY', '<access secret here>');
+	AWS_ACCESS_KEY=my-access-key
+	AWS_SECRET_KEY=my-secret
 
 ## Garbage collecting sessions
 
@@ -59,6 +59,51 @@ For example, in your `_ss_environment.php` file, set garbage collection after 1 
 	define('AWS_DYNAMODB_SESSION_LIFETIME', 3600);
 
 See https://docs.aws.amazon.com/aws-sdk-php/v3/guide/service/dynamodb-session-handler.html for more information.
+
+## Local Testing
+
+You can simulate DynamoDB locally for easier development through [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SettingUp.html).
+
+Set environment constants. Note that actual access keys and regions are ignored,
+they just need to be defined.
+
+```
+AWS_DYNAMODB_SESSION_TABLE=mysession
+AWS_ACCESS_KEY=my-access-key
+AWS_SECRET_KEY=my-secret
+AWS_DYNAMODB_ENDPOINT=http://localhost:8000
+AWS_REGION_NAME=us-east-1
+```
+
+Download [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SettingUp.html)
+and start it - it'll be available under `http://localhost:8000`.
+
+Now use the [AWS CLI Tools](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
+to interact with your local DynamoDB.
+
+Create table:
+
+```
+aws dynamodb create-table --table-name mysession --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --endpoint-url http://localhost:8000
+```
+
+List tables:
+
+```
+aws dynamodb list-tables --endpoint-url http://localhost:8000
+```
+
+List all sessions:
+
+```
+aws dynamodb scan --table-name mysession --endpoint-url http://localhost:8000
+```
+
+Delete all sessions (use create table to reset afterwards):
+
+```
+aws dynamodb delete-table --table-name mysession --endpoint-url http://localhost:8000
+```
 
 ## Contribute
 
