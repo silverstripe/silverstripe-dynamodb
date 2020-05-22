@@ -27,7 +27,11 @@ If you wish to store sessions in DynamoDB, set the required environment variable
 
 Once these are in place, this module will configure DynamoDB and register that as the session handler.
 
-Before you can actually use this, you need to create a table in which to store the sessions. This can be done through the [AWS Console for Amazon DynamoDB](https://console.aws.amazon.com/dynamodb/home), or using the SDK. When creating the table, you should set the primary key to `id` of type `string`.
+Before you can actually use this, you need to create a table in which to store the sessions.
+Follow the instructions in the [AWS SDK for PHP documentation](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/service_dynamodb-session-handler.html#basic-usage).
+
+**IMPORTANT: You need to [set up a TTL attribute](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/service_dynamodb-session-handler.html#ddbsh-garbage-collection) for garbage collection in your table.
+The module does not provide automated garbage collection abilities.**
 
 ## Using DynamoDB outside of AWS
 
@@ -39,26 +43,6 @@ in EC2 instances, as credentials are automatically handled by the IAM role insid
 	// http://docs.aws.amazon.com/aws-sdk-php/guide/latest/credentials.html#caching-iam-role-credentials
 	AWS_ACCESS_KEY=my-access-key
 	AWS_SECRET_KEY=my-secret
-
-## Garbage collecting sessions
-
-Inactive sessions are garbage collected by `GarbageCollectSessionCronTask` if [silverstripe-crontask](https://github.com/silverstripe-labs/silverstripe-crontask)
-is setup on your instance. The time when a session should be collected after inactivity can be changed by setting
-`Session::$timeout`.
-
-For example, in your application's config YAML file, this sets a 20 minute session timeout:
-
-	Session:
-		timeout: 1200
-
-You can also set the DynamoDB garbage collection time independently of `Session::$timeout`, but it's recommended you
-make it at least the value of `Session::$timeout` or greater.
-
-For example, in your `_ss_environment.php` file, set garbage collection after 1 hour of inactivity in sessions:
-
-	define('AWS_DYNAMODB_SESSION_LIFETIME', 3600);
-
-See https://docs.aws.amazon.com/aws-sdk-php/v3/guide/service/dynamodb-session-handler.html for more information.
 
 ## Local Testing
 
