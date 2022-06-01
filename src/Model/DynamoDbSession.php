@@ -2,6 +2,7 @@
 
 namespace SilverStripe\DynamoDb\Model;
 
+use Aws\Credentials\CredentialProvider;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\SessionHandler;
 use Aws\DoctrineCacheAdapter;
@@ -46,6 +47,7 @@ class DynamoDbSession
     {
         // Use DynamoDB for distributed session storage if it's configured
         $awsDynamoDBSessionTable = Environment::getEnv('AWS_DYNAMODB_SESSION_TABLE');
+
         if (!empty($awsDynamoDBSessionTable)) {
             $awsRegionName = Environment::getEnv('AWS_REGION_NAME');
             $awsDynamoDBEndpoint = Environment::getEnv('AWS_DYNAMODB_ENDPOINT');
@@ -65,9 +67,8 @@ class DynamoDbSession
                 $dynamoOptions['credentials']['secret'] = $awsSecretKey;
             } else {
                 // cache credentials when IAM fetches the credentials from EC2 metadata service
-                // this will use doctrine/cache (included via composer) to do the actual caching into APCu
-                // http://docs.aws.amazon.com/aws-sdk-php/guide/latest/performance.html#cache-instance-profile-credentials
-                $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new ApcuCache());
+                $credentials = CredentialProvider::defaultProvider();
+                $dynamoOptions['credentials'] = $credentials;
             }
 
             return new static($dynamoOptions, $awsDynamoDBSessionTable);
