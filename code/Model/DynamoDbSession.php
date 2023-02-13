@@ -2,47 +2,33 @@
 
 namespace SilverStripe\DynamoDb\Model;
 
+use Aws\Credentials\CredentialProvider;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\SessionHandler;
-use Aws\DoctrineCacheAdapter;
-use Doctrine\Common\Cache\ApcuCache;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Environment;
 
 class DynamoDbSession
 {
-    /**
-     * @var DynamoDbClient
-     */
-    protected $client;
+    protected DynamoDbClient $client;
 
     /**
-     * @var string Name of DynamoDB table to store sessions in
+     * Name of DynamoDB table to store sessions in
      */
-    protected $table;
+    protected string $table;
 
-    /**
-     * @var SessionHandler
-     */
-    protected $handler;
+    protected SessionHandler $handler;
 
-    /**
-     * Getter for SessionHandler
-     *
-     * @return SessionHandler
-     */
-    public function getHandler()
+    public function getHandler(): SessionHandler
     {
         return $this->handler;
     }
 
     /**
      * Get an instance of DynamoDbSession configured from the environment if available.
-     *
-     * @return null|DynamoDbSession
      */
-    public static function get()
+    public static function get(): ?static
     {
         // Use DynamoDB for distributed session storage if it's configured
         $awsDynamoDBSessionTable = Environment::getEnv('AWS_DYNAMODB_SESSION_TABLE');
@@ -52,7 +38,7 @@ class DynamoDbSession
             $awsAccessKey = Environment::getEnv('AWS_ACCESS_KEY');
             $awsSecretKey = Environment::getEnv('AWS_SECRET_KEY');
 
-            $dynamoOptions = array('region' => $awsRegionName);
+            $dynamoOptions = ['region' => $awsRegionName];
 
             // This endpoint can be set for locally testing DynamoDB.
             // see http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html
@@ -64,10 +50,7 @@ class DynamoDbSession
                 $dynamoOptions['credentials']['key'] = $awsAccessKey;
                 $dynamoOptions['credentials']['secret'] = $awsSecretKey;
             } else {
-                // cache credentials when IAM fetches the credentials from EC2 metadata service
-                // this will use doctrine/cache (included via composer) to do the actual caching into APCu
-                // http://docs.aws.amazon.com/aws-sdk-php/guide/latest/performance.html#cache-instance-profile-credentials
-                $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new ApcuCache());
+                $dynamoOptions['credentials'] = CredentialProvider::defaultProvider();
             }
 
             return new static($dynamoOptions, $awsDynamoDBSessionTable);
@@ -76,35 +59,35 @@ class DynamoDbSession
         return null;
     }
 
-    public function __construct($options, $table)
+    public function __construct(array $options, string $table)
     {
+        // For available client versions see https://docs.aws.amazon.com/aws-sdk-php/v3/api/index.html
+        // It should always be fixed rather than "latest" to avoid breaking changes in the API specification.
         $this->client = new DynamoDbClient(array_merge(['version' => '2012-08-10'], $options));
         $this->table = $table;
         $this->handler = SessionHandler::fromClient(
             $this->client,
             [
-            'table_name' => $this->table,
-            'session_lifetime' => $this->getSessionLifetime(),
-            'data_attribute_type' => 'binary'
+                'table_name' => $this->table,
+                'session_lifetime' => $this->getSessionLifetime(),
+                'data_attribute_type' => 'binary'
             ]
         );
     }
 
     /**
-     * check the AWS constant or refer to the Session class to find the session timeout value (if it exists) in terms
-     * of DynamoDB, session_lifetime is the time to mark the inactive session to be garbage collected
-     * if {@link GarbageCollectSessionCronTask} is running periodically on your server (via the silverstripe-crontask
-     * module), then the inactive session will get removed from the DynamoDB session table.
-     *
-     * @return int The session lifetime
+     * Check the AWS constant or refer to the Session class to find the session timeout value (if it exists) in terms
+     * of DynamoDB, session_lifetime is the time to mark the inactive session to be garbage collected.
+     * If {@link GarbageCollectSessionCronTask} is running periodically on your server (e.g. via the
+     * silverstripe-crontask module), then the inactive session will get removed from the DynamoDB session table.
      */
-    protected function getSessionLifetime()
+    protected function getSessionLifetime(): int
     {
         $awsDynamoDBSessionLifetime = Environment::getEnv('AWS_DYNAMODB_SESSION_LIFETIME');
         if (!empty($awsDynamoDBSessionLifetime)) {
-            return $awsDynamoDBSessionLifetime;
+            return (int) $awsDynamoDBSessionLifetime;
         }
-        if (($timeout = (int)Config::inst()->get(Session::class, 'timeout')) > 0) {
+        if (($timeout = (int) Config::inst()->get(Session::class, 'timeout')) > 0) {
             return $timeout;
         }
         return (int) ini_get('session.gc_maxlifetime');
