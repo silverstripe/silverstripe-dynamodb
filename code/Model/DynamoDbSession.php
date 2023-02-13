@@ -2,10 +2,9 @@
 
 namespace SilverStripe\DynamoDb\Model;
 
+use Aws\Credentials\CredentialProvider;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\SessionHandler;
-use Aws\DoctrineCacheAdapter;
-use Doctrine\Common\Cache\ApcuCache;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Environment;
@@ -64,10 +63,7 @@ class DynamoDbSession
                 $dynamoOptions['credentials']['key'] = $awsAccessKey;
                 $dynamoOptions['credentials']['secret'] = $awsSecretKey;
             } else {
-                // cache credentials when IAM fetches the credentials from EC2 metadata service
-                // this will use doctrine/cache (included via composer) to do the actual caching into APCu
-                // http://docs.aws.amazon.com/aws-sdk-php/guide/latest/performance.html#cache-instance-profile-credentials
-                $dynamoOptions['credentials'] = new DoctrineCacheAdapter(new ApcuCache());
+                $dynamoOptions['credentials'] = CredentialProvider::defaultProvider();
             }
 
             return new static($dynamoOptions, $awsDynamoDBSessionTable);
