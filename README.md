@@ -1,29 +1,33 @@
 # SilverStripe DynamoDB
 
-[![Build Status](https://travis-ci.org/silverstripe/silverstripe-dynamodb.svg?branch=master)](https://travis-ci.org/silverstripe/silverstripe-dynamodb)
+[![CI](https://github.com/silverstripe/silverstripe-dynamodb/actions/workflows/ci.yml/badge.svg)](https://github.com/silverstripe/silverstripe-dynamodb/actions/workflows/ci.yml)
 
 This module enables storing SilverStripe sessions in DynamoDB.
 
 ## Requirements
 
- * SilverStripe 4.0+
- * PHP 5.6+
+* SilverStripe 5.0+
+* PHP 8.1+
 
 ## Installation
 
 Add these custom repositories to your composer.json
 
-	composer require silverstripe/dynamodb
+```bash
+composer require silverstripe/dynamodb
+```
 
 ## Sessions with DynamoDB
 
 If you wish to store sessions in DynamoDB, set the required environment variables in `.env`:
 
-	// the name of the DynamoDB table to store sessions in
-	AWS_DYNAMODB_SESSION_TABLE=mysession
+```sh
+# The name of the DynamoDB table to store sessions in
+AWS_DYNAMODB_SESSION_TABLE=mysession
 
-	// the region that the DynamoDB table will live in (in this example here it uses Sydney)
-	AWS_REGION_NAME=ap-southeast-2
+# The region that the DynamoDB table will live in (in this example here it uses Sydney)
+AWS_REGION_NAME=ap-southeast-2
+```
 
 Once these are in place, this module will configure DynamoDB and register that as the session handler.
 
@@ -39,10 +43,12 @@ Sometimes you'll want to test that DynamoDB sessions work on your local developm
 happen by defining `AWS_ACCESS_KEY` and `AWS_SECRET_KEY`. Please don't define these constants in the environment file
 in EC2 instances, as credentials are automatically handled by the IAM role inside of AWS.
 
-	// the AWS access key and secret. This is optional if you've configured an instance with an IAM role
-	// http://docs.aws.amazon.com/aws-sdk-php/guide/latest/credentials.html#caching-iam-role-credentials
-	AWS_ACCESS_KEY=my-access-key
-	AWS_SECRET_KEY=my-secret
+```sh
+# The AWS access key and secret. This is optional if you've configured an instance with an IAM role
+# https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html
+AWS_ACCESS_KEY=my-access-key
+AWS_SECRET_KEY=my-secret
+```
 
 ## Local Testing
 
@@ -51,12 +57,12 @@ You can simulate DynamoDB locally for easier development through [DynamoDB Local
 Set environment constants. Note that actual access keys and regions are ignored,
 they just need to be defined.
 
-```
+```sh
 AWS_DYNAMODB_SESSION_TABLE=mysession
 AWS_ACCESS_KEY=my-access-key
 AWS_SECRET_KEY=my-secret
 AWS_DYNAMODB_ENDPOINT=http://localhost:8000
-AWS_REGION_NAME=us-east-1
+AWS_REGION_NAME=ap-southeast-2
 ```
 
 Download [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SettingUp.html)
@@ -67,25 +73,25 @@ to interact with your local DynamoDB.
 
 Create table:
 
-```
+```bash
 aws dynamodb create-table --table-name mysession --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --endpoint-url http://localhost:8000
 ```
 
 List tables:
 
-```
+```bash
 aws dynamodb list-tables --endpoint-url http://localhost:8000
 ```
 
 List all sessions:
 
-```
+```bash
 aws dynamodb scan --table-name mysession --endpoint-url http://localhost:8000
 ```
 
 Delete all sessions (use create table to reset afterwards):
 
-```
+```bash
 aws dynamodb delete-table --table-name mysession --endpoint-url http://localhost:8000
 ```
 
@@ -97,15 +103,3 @@ guide.
 ## License
 
 This module is released under the BSD 3-Clause License, see [license.md](license.md).
-
-## Changelog
-
-See the separate [CHANGELOG.md](CHANGELOG.md)
-
-## Code of conduct
-
-When having discussions about this module in issues or pull request please
-adhere to the [SilverStripe Community Code of Conduct](https://docs.silverstripe.org/en/contributing/code_of_conduct).
-
-
-
