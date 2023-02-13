@@ -78,8 +78,8 @@ class DynamoDbSession
     /**
      * Check the AWS constant or refer to the Session class to find the session timeout value (if it exists) in terms
      * of DynamoDB, session_lifetime is the time to mark the inactive session to be garbage collected.
-     * If {@link GarbageCollectSessionCronTask} is running periodically on your server (e.g. via the silverstripe-crontask
-     * module), then the inactive session will get removed from the DynamoDB session table.
+     * If {@link GarbageCollectSessionCronTask} is running periodically on your server (e.g. via the
+     * silverstripe-crontask module), then the inactive session will get removed from the DynamoDB session table.
      */
     protected function getSessionLifetime(): int
     {
