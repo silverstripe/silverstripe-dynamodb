@@ -54,6 +54,8 @@ AWS_SECRET_KEY=my-secret
 
 You can simulate DynamoDB locally for easier development through [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SettingUp.html).
 
+You can also view the custom dynamodb job in `.github/workflows/ci.yml` which demonstrates how to setup dynamodb in a local environment.
+
 Set environment constants. Note that actual access keys and regions are ignored,
 they just need to be defined.
 

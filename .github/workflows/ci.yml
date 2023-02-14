@@ -14,3 +14,209 @@ jobs:
     # Only run cron on the silverstripe account
     if: (github.event_name == 'schedule' && startsWith(github.repository, 'silverstripe/')) || (github.event_name != 'schedule')
     uses: silverstripe/gha-ci/.github/workflows/ci.yml@v1
+
+  # This is a custom job that installs dynamodb and validates that session data is saved to it
+  dyanmodb:
+    name: dynamodb
+    # Only run cron on the silverstripe account
+    if: (github.event_name == 'schedule' && startsWith(github.repository, 'silverstripe/')) || (github.event_name != 'schedule')
+    runs-on: ubuntu-latest
+
+    services:
+      mysql57:
+        image: mysql:5.7
+        env:
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: SS_mysite
+        ports:
+          - 3357:3306
+
+    env:
+      # these are used by aws-cli, which is pre-installed in github actions
+      AWS_ACCESS_KEY_ID: my-access-key
+      AWS_SECRET_ACCESS_KEY: my-secret
+      AWS_DEFAULT_REGION: ap-southeast-2
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # v2.4.2
+
+      - name: Install dynamodb
+        run: |
+          mkdir _dynamodb
+          cd _dynamodb
+          sudo wget https://s3.ap-southeast-1.amazonaws.com/dynamodb-local-singapore/dynamodb_local_latest.tar.gz
+          sudo tar -xf dynamodb_local_latest.tar.gz
+          cd -
+
+      - name: Run dynamodb
+        run: |
+          # run as background process - this will create run on a default port of 8000
+          # github actions comes java - `java -version` = openjdk version "11.0.18" 2023-01-17
+          cd _dynamodb
+          $(java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar) &
+          cd -
+
+      - name: Configure dynamodb via aws-cli
+        run: |
+          # aws-cli comes pre-installed in github actions
+          aws dynamodb create-table --table-name mysession --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --endpoint-url http://localhost:8000
+          aws dynamodb list-tables --endpoint-url http://localhost:8000
+
+      - name: Install PHP
+        # SHA will need to be updated to support new php version when they are released
+        uses: shivammathur/setup-php@3eda58347216592f618bb1dff277810b6698e4ca # v2.19.1
+        with:
+          php-version: 8.1
+          extensions: curl, dom, gd, intl, json, ldap, mbstring, mysql, tidy, xdebug, zip
+          tools: composer:v2
+          coverage: xdebug
+
+      - name: Configure PHP
+        run: |
+          sudo sh -c "echo 'memory_limit = 6G' >> /etc/php/8.1/cli/php.ini"
+          # Disable xdebug
+          sudo sh -c "echo ';zend_extension=xdebug.so' > /etc/php/8.1/mods-available/xdebug.ini"
+          echo "PHP has been configured"
+
+      - name: Apt install requirements
+        run: |
+          sudo apt install -y libapache2-mod-php lynx
+
+      - name: Configure apache
+        run: |
+          # apache2 is installed and running by default in ubuntu
+          # update dir.conf to use index.php as the primary index doc
+          # using an intermediate file instead of variable to prevent the following issue:
+          # echo "$DIR_CONF" > /etc/apache2/mods-enabled/dir.conf: Permission denied
+          cat << EOF > __dir.conf
+          <IfModule mod_dir.c>
+            DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+          </IfModule>
+          EOF
+          sudo cp __dir.conf /etc/apache2/mods-enabled/dir.conf
+          rm __dir.conf
+          # create a 000-default.conf file with the pwd as the DocumentRoot
+          cat << EOF > __000-default.conf
+          <VirtualHost *:80>
+            ServerAdmin webmaster@localhost
+            DocumentRoot $(pwd)
+            <Directory $(pwd)>
+              AllowOverride All
+              Require all granted
+            </Directory>
+            LogLevel notice
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
+          </VirtualHost>
+          EOF
+          sudo cp __000-default.conf /etc/apache2/sites-enabled/000-default.conf
+          rm __000-default.conf
+          sudo a2enmod rewrite
+          # run apache as 'runner:docker' instead of 'www-data:www-data'
+          sudo sh -c "echo 'export APACHE_RUN_USER=runner' >> /etc/apache2/envvars"
+          sudo sh -c "echo 'export APACHE_RUN_GROUP=docker' >> /etc/apache2/envvars"
+          sudo systemctl restart apache2
+          echo "Apache has been configured"
+
+      # This is shared between runs, not just jobs. It means the first time the repo runs the job it'll
+      # need to download requirements for the first time, after that it will be plenty quick
+      # https://docs.github.com/en/actions/advanced-guides/caching-dependencies-to-speed-up-workflows
+      - name: Enable shared composer cache
+        uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # @v2.1.7
+        with:
+          path: ~/.cache/composer
+          key: shared-composer-cache
+
+      - name: Composer
+        run: |
+          framework_version=$(php -r '
+            $v = json_decode(file_get_contents("composer.json"))->require->{"silverstripe/framework"};
+            preg_match("#([0-9])#", $v, $m);
+            echo $m[1];
+          ')
+          composer require silverstripe/installer:^$framework_version --no-update
+          composer config allow-plugins.composer/installers true
+          composer config allow-plugins.silverstripe/recipe-plugin true
+          composer config allow-plugins.silverstripe/vendor-plugin true
+          composer install --prefer-dist
+
+      - name: Create .env
+        run: |
+          cat << EOF > .env
+          SS_DATABASE_CLASS="MySQLDatabase"
+          SS_DATABASE_PORT="3357"
+          SS_DATABASE_SERVER="127.0.0.1"
+          SS_DATABASE_USERNAME="root"
+          SS_DATABASE_PASSWORD="root"
+          SS_ENVIRONMENT_TYPE="dev"
+          SS_DATABASE_NAME="SS_mysite"
+          SS_DEFAULT_ADMIN_USERNAME="admin"
+          SS_DEFAULT_ADMIN_PASSWORD="password"
+          SS_TRUSTED_PROXY_IPS="*"
+          SS_MFA_SECRET_KEY="1234567894175b99966561e1efe237e4"
+          SS_BASE_URL="http://localhost"
+          AWS_DYNAMODB_ENDPOINT="http://localhost:8000"
+          AWS_DYNAMODB_SESSION_TABLE=mysession
+          AWS_ACCESS_KEY=my-access-key
+          AWS_SECRET_KEY=my-secret
+          AWS_REGION_NAME=ap-southeast-2
+          EOF
+          echo ".env is"
+          cat .env
+
+      - name: Confirm there are no session data in dynamodb
+        run: |
+          aws dynamodb scan --table-name mysession --endpoint-url http://localhost:8000 > tmp1.json
+          cat tmp1.json
+          c=$(php -r 'echo json_decode(file_get_contents("tmp1.json"))->Count;')
+          echo "Count is $c, it should be 0"
+          if [[ $c != "0" ]]; then
+            exit 1
+          fi
+
+      - name: dev/build flush=1
+        run: |
+          vendor/bin/sake dev/build flush=1
+
+      # The following is done to ensure that session_write_close() is actually called when
+      # requesting frontend using lynx browser. session_write_close() need to be called
+      # for code Aws\DynamoDb\SessionHandler::close() to be called
+      # normal browsers will cause session_write_close() to be called, but for whatever
+      # reason lynx browser does not
+      # cannot seem to use phpunit or behat for this, possibly because the testsession interferes
+      - name: Update PageController.php
+        run: |
+          cat << EOF > app/src/PageController.php
+          <?php
+          use SilverStripe\Control\HTTPRequest;
+          use SilverStripe\Control\Session;
+          use SilverStripe\CMS\Controllers\ContentController;
+          class PageController extends ContentController
+          {
+              protected function init()
+              {
+                  parent::init();
+                  \$req = new HTTPRequest('GET', '/');
+                  \$session = new Session(null);
+                  \$session->start(\$req);
+              }
+          }
+          EOF
+
+      - name: Request page from frontend
+        run: |
+          $(lynx -source -term=linux localhost > /dev/null) &
+          sleep 3
+
+      - name: Confirm there is now session data in dynamodb
+        run: |
+          aws dynamodb scan --table-name mysession --endpoint-url http://localhost:8000 > tmp2.json
+          cat tmp2.json
+          c=$(php -r 'echo json_decode(file_get_contents("tmp2.json"))->Count;')
+          echo "Count is $c, it should be 1"
+          if [[ $c != "1" ]]; then
+            exit 1
+          fi
