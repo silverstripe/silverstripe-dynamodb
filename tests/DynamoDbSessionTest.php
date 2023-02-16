@@ -6,6 +6,11 @@ use ReflectionProperty;
 use SilverStripe\Core\Environment;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\DynamoDb\Model\DynamoDbSession;
+use Aws\DynamoDb\DynamoDbClient;
+use SilverStripe\Control\Session;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Cookie;
+use Exception;
 
 class DynamoDbSessionTest extends SapphireTest
 {
@@ -60,5 +65,86 @@ class DynamoDbSessionTest extends SapphireTest
         $sess = new DynamoDbSession($dynamoOptions, 'session_table');
         $handler = $sess->getHandler();
         $this->assertInstanceOf('\\Aws\\DynamoDb\\SessionHandler', $handler);
+    }
+
+    private function getSessions(DynamoDbClient $client, string $tableName): array
+    {
+        return $client->scan([
+            'TableName' => $tableName,
+        ])->get('Items');
+    }
+
+    /**
+     * This test requires the strerr="true" attribute in phpunit.xml.dist to be set otherwise
+     * you'll get a failure because of
+     * "session_set_save_handler(): Session save handler cannot be changed after headers have already been sent"
+     */
+    public function testSessionsAreStoredInDynamoDB()
+    {
+        $tableName = 'unit-test-mysession';
+
+        $dynamoDbSession = new DynamoDbSession([
+            'endpoint' =>  Environment::getEnv('AWS_DYNAMODB_ENDPOINT'),
+            'region' => Environment::getEnv('AWS_REGION_NAME'),
+            'credentials' => [
+                'key' => Environment::getEnv('AWS_ACCESS_KEY'),
+                'secret' => Environment::getEnv('AWS_SECRET_KEY')
+            ]
+        ], $tableName);
+        $dynamoDbSession->register();
+        $client = $dynamoDbSession->getClient();
+
+        $result = $client->listTables();
+        // Delete any pre-existing session table (may still be there from failed unit test)
+        foreach ($result['TableNames'] ?? [] as $resultTableName) {
+            if ($resultTableName === $tableName) {
+                $client->deleteTable([
+                    'TableName' => $tableName,
+                ]);
+            }
+        }
+
+        // Create new session table
+        $client->createTable([
+            'TableName' => $tableName,
+            'AttributeDefinitions' => [
+                [
+                    'AttributeName' => 'id',
+                    'AttributeType' => 'S'
+                ],
+            ],
+            'KeySchema' => [
+                [
+                    'AttributeName' => 'id',
+                    'KeyType' => 'HASH'
+                ]
+            ],
+            'ProvisionedThroughput' => [
+                'ReadCapacityUnits' => 1,
+                'WriteCapacityUnits' => 1
+            ],
+        ]);
+
+        $sessions = $this->getSessions($client, $tableName);
+        $this->assertSame(0, count($sessions));
+
+        // Start a new session in Silverstripe
+        Session::config()->set('strict_user_agent_check', false);
+        $req = new HTTPRequest('GET', '/');
+        Cookie::set(session_name(), '1234');
+        $session = new Session(null);
+        $session->init($req);
+        $sessionID = session_id();
+        // Session has to close for the data to be written to dynamodb
+        session_write_close();
+
+        $sessions = $this->getSessions($client, $tableName);
+        $this->assertSame(1, count($sessions));
+        $this->assertStringContainsString($sessionID, $sessions[0]['id']['S']);
+
+        // Delete the dynamodb table
+        $client->deleteTable([
+            'TableName' => $tableName,
+        ]);
     }
 }
