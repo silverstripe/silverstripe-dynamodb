@@ -25,6 +25,11 @@ class DynamoDbSession
         return $this->handler;
     }
 
+    public function getClient(): DynamoDbClient
+    {
+        return $this->client;
+    }
+
     /**
      * Get an instance of DynamoDbSession configured from the environment if available.
      */
