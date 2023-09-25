@@ -46,8 +46,10 @@ in EC2 instances, as credentials are automatically handled by the IAM role insid
 ```sh
 # The AWS access key and secret. This is optional if you've configured an instance with an IAM role
 # https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html
-AWS_ACCESS_KEY=my-access-key
-AWS_SECRET_KEY=my-secret
+# Note that AWS_ACCESS_KEY can only contain alphanumeric characters 
+# https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html#DynamoDBLocal.DownloadingAndRunning.title
+AWS_ACCESS_KEY=myaccesskey
+AWS_SECRET_KEY=mysecret
 ```
 
 ## Local Testing
@@ -57,10 +59,10 @@ You can simulate DynamoDB locally for easier development through [DynamoDB Local
 Set environment constants. Note that actual access keys and regions are ignored,
 they just need to be defined.
 
-```sh
+```bash
 AWS_DYNAMODB_SESSION_TABLE=mysession
-AWS_ACCESS_KEY=my-access-key
-AWS_SECRET_KEY=my-secret
+AWS_ACCESS_KEY=myaccesskey
+AWS_SECRET_KEY=mysecret
 AWS_DYNAMODB_ENDPOINT=http://localhost:8000
 AWS_REGION_NAME=ap-southeast-2
 ```
@@ -70,6 +72,16 @@ and start it - it'll be available under `http://localhost:8000`.
 
 Now use the [AWS CLI Tools](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
 to interact with your local DynamoDB.
+
+Configure user (optional):
+
+You can configure a user to use with the AWS CLI tools. Use this if you are having issues with the environment variables being picked up.
+
+```bash
+aws configure set aws_access_key_id myaccesskey
+aws configure set aws_secret_access_key myaccesskey
+aws configure set default.region ap-southeast-2
+```
 
 Create table:
 
