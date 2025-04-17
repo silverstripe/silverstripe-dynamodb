@@ -7,6 +7,7 @@ use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\SessionHandler;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Session;
+use SilverStripe\Control\SessionHandler\FileSessionHandler;
 use SilverStripe\Core\Environment;
 
 class DynamoDbSession
@@ -103,6 +104,11 @@ class DynamoDbSession
      */
     public function register()
     {
+        // Silverstripe CMS 6.1 introduced a new way to handle session handlers.
+        // We need to set that configuration to `null` so our handler isn't replaced.
+        if (class_exists(FileSessionHandler::class)) {
+            Session::config()->set('save_handler', null);
+        }
         return $this->handler->register();
     }
 }
