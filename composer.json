@@ -20,7 +20,7 @@
     ],
     "require": {
         "aws/aws-sdk-php": "^3.334",
-        "silverstripe/framework": "^6"
+        "silverstripe/framework": "^7"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.3",
